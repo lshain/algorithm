@@ -18,53 +18,64 @@ using namespace std;
 int n, m;
 int re[25];
 int val[15][25];
-bool finish;
+int na;
 int ans[15];
 int tp[15];
-int sum[15];
+int sum[25];
+int minans;
 
-void dfs( int ii, int x, int nn )
+void dfs( int x )// 枚举 每项 选还是不选
 {
-	if( !finish )
+	if( x > n )
 	{
-		int i = 0;
-		int j = 0;
-		if( x == nn )
+		return;
+	}
+
+	int i = 0;
+	int j = 0;
+	if( x > 0 && na < minans )
+	{
+		bool ok = true;
+		for( i = 0; i < m; i++ )
 		{
-			for( i = 0; i < nn; i++ )
+			if( sum[i] < re[i] )
 			{
-				printf(" %d", ans[i]);
+				ok = false;
+				break;
 			}
-			printf("\n");
-
-			for( i = 0; i < m; i++ )
-			{
-				if( sum[i] < re[i] )
-				{
-					return;
-				}
-			}
-
-			finish = true;
 		}
-		else
+
+		if( ok )
 		{
-			for( i = ii; i < n && !finish; i++ )
+			//	printf("na = %d\n", na);
+			minans = na;
+			for( i = 0; i < na; i++ )
 			{
-				ans[x] = i;
-
-				for( j = 0; j < m; j++ )
-				{
-					sum[j] += val[i][j];
-				}
-
-				dfs( ii + 1, x + 1, nn );
-
-				for( j = 0; j < m; j++ )
-				{
-					sum[j] -= val[i][j];
-				}
+				tp[i] = ans[i];
 			}
+		}
+	}
+
+	for( i = 1; i >= 0; i-- )
+	{
+		if( i != 0 )
+		{
+			ans[na++] = x;
+			for( j = 0; j < m; j++ )
+			{
+				sum[j] += val[x][j];
+			}
+		}
+
+		dfs( x + 1 );
+
+		if( i != 0 )
+		{
+			for( j = 0; j < m; j++ )
+			{
+				sum[j] -= val[x][j];
+			}
+			na--;
 		}
 	}
 }
@@ -91,39 +102,14 @@ int main( int argc, char* argv[], char* env[] )
 		}
 	}
 
-	int min = 1;
-	int max = n;
-	int minans = 0;
-	bool isok = false;
-	while( min < max )
-	{
-		i = ( min + max )>>1;
-
-		finish = false;
-		dfs( 0, 0, i );
-
-		if( finish )
-		{
-			minans = i;
-			for( j = 0; j < i; j++ )
-			{
-				tp[j] = ans[j];
-			}
-
-			max = i - 1;
-		}
-		else
-		{
-			min = i + 1;
-		}
-
-		printf("i = %d\n", i);
-	}
+	na = 0;
+	minans = n + 1;
+	dfs( 0 );
 
 	printf("%d", minans);
-	for( j = 0; j < minans; j++ )
+	for( i = 0; i < minans; i++ )
 	{
-		printf(" %d", tp[j] + 1);
+		printf(" %d", tp[i] + 1);
 	}
 
 	printf("\n");
